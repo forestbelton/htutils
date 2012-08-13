@@ -28,7 +28,7 @@ instance Show Operation where
       OP_COMPARE_LT          -> "<"
       OP_COMPARE_EQ          -> "=="
       OP_COMPARE_GT          -> ">"
-      OP_BITWISE_NAND        -> "&~"
+      OP_BITWISE_ANDN        -> "&~"
       OP_BITWISE_XOR         -> "^"
       OP_SUBTRACT            -> "-"
       OP_BITWISE_XORN        -> "^~"
