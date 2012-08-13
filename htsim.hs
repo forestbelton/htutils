@@ -43,10 +43,10 @@ data Instruction = Instruction { addr :: AddrMode, op :: Operation, z :: Registe
 instance Show Instruction where
   show Instruction {addr=mode, op=oper, z=dst, x=src1, y=src2, imm=im} =
     case mode of
-      Mode00 -> fmt "%s <- %s %s %s + %u"
-      Mode01 -> fmt "%s <- [%s %s %s + %u]"
-      Mode10 -> fmt "[%s] <- %s %s %s + %u"
-      Mode11 -> fmt "%s -> [%s %s %s + %u]"
+      Mode00 -> fmt "%s <- %s %s %s + 0x%08x"
+      Mode01 -> fmt "%s <- [%s %s %s + 0x%08x]"
+      Mode10 -> fmt "[%s] <- %s %s %s + 0x%08x"
+      Mode11 -> fmt "%s -> [%s %s %s + 0x%08x]"
    where fmt s = printf s (show dst) (show src1) (show oper) (show src2) im
 
 toInstruction :: Word32 -> Instruction
