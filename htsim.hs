@@ -10,10 +10,10 @@ data Operation = OP_BITWISE_OR          |
                  OP_COMPARE_LT          |
                  OP_COMPARE_EQ          |
                  OP_COMPARE_GT          |
-                 OP_BITWISE_NAND        |
+                 OP_BITWISE_ANDN        |
                  OP_BITWISE_XOR         |
-                 OP_ADD_NEGATIVE_Y      |
-                 OP_XOR_INVERT_Y        |
+                 OP_SUBTRACT            |
+                 OP_BITWISE_XORN        |
                  OP_SHIFT_RIGHT_LOGICAL |
                  OP_COMPARE_NE deriving Enum
 
@@ -30,8 +30,8 @@ instance Show Operation where
       OP_COMPARE_GT          -> ">"
       OP_BITWISE_NAND        -> "&~"
       OP_BITWISE_XOR         -> "^"
-      OP_ADD_NEGATIVE_Y      -> "-"
-      OP_XOR_INVERT_Y        -> "^~"
+      OP_SUBTRACT            -> "-"
+      OP_BITWISE_XORN        -> "^~"
       OP_SHIFT_RIGHT_LOGICAL -> ">>"
       OP_COMPARE_NE          -> "/="
 
@@ -81,10 +81,10 @@ getOp OP_SHIFT_LEFT          = \x y -> x * (2 ^ y)
 getOp OP_COMPARE_LT          = \x y -> boolToReg (foo x < foo y)
 getOp OP_COMPARE_EQ          = \x y -> boolToReg (x == y)
 getOp OP_COMPARE_GT          = \x y -> boolToReg (foo x > foo y)
-getOp OP_BITWISE_NAND        = \x y -> complement (x .&. y)
+getOp OP_BITWISE_ANDN        = \x y -> x .&. (complement y)
 getOp OP_BITWISE_XOR         = \x y -> x `xor` y
-getOp OP_ADD_NEGATIVE_Y      = \x y -> x - y
-getOp OP_XOR_INVERT_Y        = \x y -> x `xor` (complement y)
+getOp OP_SUBTRACT            = \x y -> x - y
+getOp OP_BITWISE_XORN        = \x y -> x `xor` (complement y)
 getOp OP_SHIFT_RIGHT_LOGICAL = \x y -> x `div` (2 ^ y)
 getOp OP_COMPARE_NE          = \x y -> boolToReg (x /= y)
 
