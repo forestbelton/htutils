@@ -15,7 +15,7 @@ data Operation = OP_BITWISE_OR          |
                  OP_ADD_NEGATIVE_Y      |
                  OP_XOR_INVERT_Y        |
                  OP_SHIFT_RIGHT_LOGICAL |
-                 OP_COMPARE_NE
+                 OP_COMPARE_NE deriving Enum
 
 instance Show Operation where
   show oper =
@@ -35,7 +35,7 @@ instance Show Operation where
       OP_SHIFT_RIGHT_LOGICAL -> ">>"
       OP_COMPARE_NE          -> "/="
 
-data Register = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P deriving Show
+data Register = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P deriving (Show, Enum)
 
 data AddrMode = Mode00 | Mode01 | Mode10 | Mode11 deriving Eq
 
@@ -68,17 +68,9 @@ boolToReg :: Bool -> Word32
 boolToReg False = 0
 boolToReg True  = 0xffffffff
 
-decodeRegister :: Int -> Register
-decodeRegister = ([A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] !!)
-
 -- don't ask
 foo :: Word32 -> Word32
 foo = xor 0x80000000
-
-decodeOp :: Int -> Operation
-decodeOp = ([OP_BITWISE_OR, OP_BITWISE_AND, OP_ADD, OP_MULTIPLY, OP_SHIFT_LEFT,
-        OP_COMPARE_LT, OP_COMPARE_EQ, OP_COMPARE_GT, OP_BITWISE_NAND, OP_ADD_NEGATIVE_Y,
-        OP_XOR_INVERT_Y, OP_SHIFT_RIGHT_LOGICAL, OP_COMPARE_NE] !!)
 
 getOp :: Operation -> (Word32 -> Word32 -> Word32)
 getOp OP_BITWISE_OR          = \x y -> x .|. y
