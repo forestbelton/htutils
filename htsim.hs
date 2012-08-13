@@ -18,20 +18,22 @@ data Operation = OP_BITWISE_OR          |
                  OP_COMPARE_NE
 
 instance Show Operation where
-  show OP_BITWISE_OR          = "|"
-  show OP_BITWISE_AND         = "&"
-  show OP_ADD                 = "+"
-  show OP_MULTIPLY            = "*"
-  show OP_SHIFT_LEFT          = "<<"
-  show OP_COMPARE_LT          = "<"
-  show OP_COMPARE_EQ          = "=="
-  show OP_COMPARE_GT          = ">"
-  show OP_BITWISE_NAND        = "&~"
-  show OP_BITWISE_XOR         = "^"
-  show OP_ADD_NEGATIVE_Y      = "-"
-  show OP_XOR_INVERT_Y        = "^~"
-  show OP_SHIFT_RIGHT_LOGICAL = ">>"
-  show OP_COMPARE_NE          = "/="
+  show oper =
+    case oper of
+      OP_BITWISE_OR          -> "|"
+      OP_BITWISE_AND         -> "&"
+      OP_ADD                 -> "+"
+      OP_MULTIPLY            -> "*"
+      OP_SHIFT_LEFT          -> "<<"
+      OP_COMPARE_LT          -> "<"
+      OP_COMPARE_EQ          -> "=="
+      OP_COMPARE_GT          -> ">"
+      OP_BITWISE_NAND        -> "&~"
+      OP_BITWISE_XOR         -> "^"
+      OP_ADD_NEGATIVE_Y      -> "-"
+      OP_XOR_INVERT_Y        -> "^~"
+      OP_SHIFT_RIGHT_LOGICAL -> ">>"
+      OP_COMPARE_NE          -> "/="
 
 data Register = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P deriving Show
 
