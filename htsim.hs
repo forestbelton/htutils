@@ -37,15 +37,15 @@ instance Show Operation where
 
 data Register = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P deriving Show
 
-data AddrMode = Mode00 | Mode01 | Mode10 | Mode11
+data AddrMode = Mode00 | Mode01 | Mode10 | Mode11 deriving Eq
 
-data Instruction = Instruction { addr :: Word32, op :: Operation, z :: Register, x :: Register, y :: Register, imm :: Word32}
+data Instruction = Instruction { addr :: AddrMode, op :: Operation, z :: Register, x :: Register, y :: Register, imm :: Word32}
 instance Show Instruction where
   show Instruction {addr=mode, op=oper, z=dst, x=src1, y=src2, imm=im}
-    | mode == 0 = fmt "%s <- %s %s %s + %u"
-    | mode == 1 = fmt "%s <- [%s %s %s + %u]"
-    | mode == 2 = fmt "[%s] <- %s %s %s + %u"
-    | mode == 3 = fmt "%s -> [%s %s %s + %u]"
+    | mode == Mode00 = fmt "%s <- %s %s %s + %u"
+    | mode == Mode01 = fmt "%s <- [%s %s %s + %u]"
+    | mode == Mode10 = fmt "[%s] <- %s %s %s + %u"
+    | mode == Mode11 = fmt "%s -> [%s %s %s + %u]"
     | otherwise = error "incorrect mode"
     where fmt s = printf s (show dst) (show src1) (show oper) (show src2) (show im)
 
