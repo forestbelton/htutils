@@ -2,8 +2,6 @@ import Data.Bits
 import Data.Word
 import Text.Printf
 
-type RegFunc  = Word32 -> Word32 -> Word32
-
 data Operation = OP_BITWISE_OR          |
                  OP_BITWISE_AND         |
                  OP_ADD                 |
@@ -61,8 +59,8 @@ data State = State { a :: Word32, b :: Word32,
 extract :: Word32 -> Int -> Int -> Word32
 extract word start len = (shiftR word start) .&. (shiftL 1 len - 1)
 
-evalOp :: RegFunc -> Word32 -> Word32 -> Word32 -> Word32
-evalOp f x y i = f x y + i
+evalOp :: Operation -> Word32 -> Word32 -> Word32 -> Word32
+evalOp f x y i = (getOp f) x y + i
 
 boolToReg :: Bool -> Word32
 boolToReg False = 0
@@ -80,7 +78,7 @@ decodeOp = ([OP_BITWISE_OR, OP_BITWISE_AND, OP_ADD, OP_MULTIPLY, OP_SHIFT_LEFT,
         OP_COMPARE_LT, OP_COMPARE_EQ, OP_COMPARE_GT, OP_BITWISE_NAND, OP_ADD_NEGATIVE_Y,
         OP_XOR_INVERT_Y, OP_SHIFT_RIGHT_LOGICAL, OP_COMPARE_NE] !!)
 
-getOp :: Operation -> RegFunc
+getOp :: Operation -> (Word32 -> Word32 -> Word32)
 getOp OP_BITWISE_OR          = \x y -> x .|. y
 getOp OP_BITWISE_AND         = \x y -> x .&. y
 getOp OP_ADD                 = \x y -> x + y
