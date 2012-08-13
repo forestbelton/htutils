@@ -45,13 +45,13 @@ instance Show Instruction where
     | mode == Mode10 = fmt "[%s] <- %s %s %s + %u"
     | mode == Mode11 = fmt "%s -> [%s %s %s + %u]"
     | otherwise = error "incorrect mode"-}
-  show Instruction {addr=mode, op=oper, z=dst, x=src1, y=src2, imm=im}
+  show Instruction {addr=mode, op=oper, z=dst, x=src1, y=src2, imm=im} =
     case mode of
       Mode00 -> fmt "%s <- %s %s %s + %u"
       Mode01 -> fmt "%s <- [%s %s %s + %u]"
       Mode10 -> fmt "[%s] <- %s %s %s + %u"
       Mode11 -> fmt "%s -> [%s %s %s + %u]"
-    where fmt s = printf s (show dst) (show src1) (show oper) (show src2) (show im)
+   where fmt s = printf s (show dst) (show src1) (show oper) (show src2) im
 
 data State = State { a :: Word32, b :: Word32,
                      c :: Word32, d :: Word32,
