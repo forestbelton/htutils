@@ -50,13 +50,13 @@ instance Show Instruction where
    where fmt s = printf s (show dst) (show src1) (show oper) (show src2) im
 
 toInstruction :: Word32 -> Instruction
-toInstruction w = Instruction (toEnum mode) (toEnum oper) (toEnum dst) (toEnum src1) (toEnum src2) 0
+toInstruction w = Instruction (toEnum mode) (toEnum oper) (toEnum dst) (toEnum src1) (toEnum src2) imm
   where mode = fromIntegral $ extract w 28 2
         dst  = fromIntegral $ extract w 24 4
         src1 = fromIntegral $ extract w 20 4
         src2 = fromIntegral $ extract w 16 4
         oper = fromIntegral $ extract w 12 4
---        imm  = extract w 0 12
+        imm  = sex $ extract w 0 12
 
 data State = State { a :: Word32, b :: Word32,
                      c :: Word32, d :: Word32,
@@ -69,6 +69,10 @@ data State = State { a :: Word32, b :: Word32,
 
 extract :: Word32 -> Int -> Int -> Word32
 extract word start len = (shiftR word start) .&. (shiftL 1 len - 1)
+
+-- Sign EXtension
+sex :: Word32 -> Word32
+sex n = n .|. (0xfffff800 * ((shiftR n 11) .&. 1))
 
 evalOp :: Operation -> Word32 -> Word32 -> Word32 -> Word32
 evalOp f x y i = (getOp f) x y + i
