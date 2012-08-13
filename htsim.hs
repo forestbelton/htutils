@@ -37,7 +37,7 @@ instance Show Operation where
 
 data Register = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P deriving (Show, Enum)
 
-data AddrMode = Mode00 | Mode01 | Mode10 | Mode11 deriving Eq
+data AddrMode = Mode00 | Mode01 | Mode10 | Mode11 deriving (Eq, Enum)
 
 data Instruction = Instruction { addr :: AddrMode, op :: Operation, z :: Register, x :: Register, y :: Register, imm :: Word32}
 instance Show Instruction where
@@ -48,6 +48,15 @@ instance Show Instruction where
       Mode10 -> fmt "[%s] <- %s %s %s + %u"
       Mode11 -> fmt "%s -> [%s %s %s + %u]"
    where fmt s = printf s (show dst) (show src1) (show oper) (show src2) im
+
+toInstruction :: Word32 -> Instruction
+toInstruction w = Instruction (toEnum mode) (toEnum oper) (toEnum dst) (toEnum src1) (toEnum src2) 0
+  where mode = fromIntegral $ extract w 28 2
+        dst  = fromIntegral $ extract w 24 4
+        src1 = fromIntegral $ extract w 20 4
+        src2 = fromIntegral $ extract w 16 4
+        oper = fromIntegral $ extract w 12 4
+--        imm  = extract w 0 12
 
 data State = State { a :: Word32, b :: Word32,
                      c :: Word32, d :: Word32,
