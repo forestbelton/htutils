@@ -8,15 +8,9 @@ import System.Environment
 
 readFile :: Get [Instruction]
 readFile = do
---readHeader :: Get (Word32, Word32)
---readHeader = do
   magic   <- getWord32le
   flags   <- getWord32le
   rec_count <- getWord32le -- discard for now
---  return (magic, flags)
---
---readRecord :: Get (Word32, Word32, [Word32])
---readRecord = do
   address <- getWord32le
   size    <- getWord32le
   insns   <- replicateM (fromIntegral size) getWord32le
@@ -27,10 +21,6 @@ main :: IO ()
 main = do argv <- getArgs
           let file = Prelude.head argv
           raw_data <- Data.ByteString.Lazy.readFile file
---          let header = runGet readHeader raw_data
---          print header
---          let record = runGet readRecord raw_data
---          print record
           let d = runGet Main.readFile raw_data
           print d
           return ()
