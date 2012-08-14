@@ -1,12 +1,25 @@
 import Data.Bits
 import Data.Word
+import Data.Binary.Get
+import Data.ByteString.Lazy
 import Text.Printf
 import System.Environment
 
+readHeader :: Get (Word32, Word32, Word32)
+readHeader = do
+  magic   <- getWord32be
+  version <- getWord32be
+  flags   <- getWord32be
+  rec_count <- getWord32be -- discard for now
+  return (magic, version, flags)
+
 main :: IO ()
 main = do argv <- getArgs
-          let file = head argv
-          putStrLn file
+          let file = Prelude.head argv
+          raw_data <- Data.ByteString.Lazy.readFile file
+          let header = runGet readHeader raw_data
+          print header
+          return ()
 
 data Operation = OP_BITWISE_OR          |
                  OP_BITWISE_AND         |
