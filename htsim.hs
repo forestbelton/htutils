@@ -1,3 +1,4 @@
+import Control.Monad
 import Data.Bits
 import Data.Word
 import Data.Binary.Get
@@ -7,17 +8,25 @@ import System.Environment
 
 readHeader :: Get (Word32, Word32)
 readHeader = do
-  magic   <- getWord32be
-  flags   <- getWord32be
-  rec_count <- getWord32be -- discard for now
+  magic   <- getWord32le
+  flags   <- getWord32le
+  rec_count <- getWord32le -- discard for now
   return (magic, flags)
+
+readRecord :: Get (Word32, Word32, [Word32])
+readRecord = do
+  address <- getWord32le
+  size    <- getWord32le
+  insns   <- replicateM (fromIntegral size) getWord32le
+  return (address, size, insns)
 
 main :: IO ()
 main = do argv <- getArgs
           let file = Prelude.head argv
           raw_data <- Data.ByteString.Lazy.readFile file
           let header = runGet readHeader raw_data
-          print header
+          let record = runGet readRecord raw_data
+          print record
           return ()
 
 data Operation = OP_BITWISE_OR          |
