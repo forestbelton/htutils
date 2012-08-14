@@ -1,6 +1,12 @@
 import Data.Bits
 import Data.Word
 import Text.Printf
+import System.Environment
+
+main :: IO ()
+main = do argv <- getArgs
+          let file = head argv
+          putStrLn file
 
 data Operation = OP_BITWISE_OR          |
                  OP_BITWISE_AND         |
