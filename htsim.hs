@@ -72,8 +72,9 @@ data Register = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P de
 
 data AddrMode = Mode00 | Mode01 | Mode10 | Mode11 deriving (Eq, Enum)
 
-data Instruction = Instruction { addr :: AddrMode, op :: Operation, z :: Register, x :: Register, y :: Register, imm :: Word32}
+data Instruction = Illegal | Instruction { addr :: AddrMode, op :: Operation, z :: Register, x :: Register, y :: Register, imm :: Word32}
 instance Show Instruction where
+  show Illegal = "illegal"
   show Instruction {addr=mode, op=oper, z=dst, x=src1, y=src2, imm=im} =
     case mode of
       Mode00 -> fmt "%s <- %s %s %s + 0x%08x"
@@ -83,6 +84,7 @@ instance Show Instruction where
    where fmt s = printf s (show dst) (show src1) (show oper) (show src2) im
 
 toInstruction :: Word32 -> Instruction
+toInstruction 0xffffffff = Illegal
 toInstruction w = Instruction (toEnum mode) (toEnum oper) (toEnum dst) (toEnum src1) (toEnum src2) imm
   where mode = fromIntegral $ extract w 28 2
         dst  = fromIntegral $ extract w 24 4
