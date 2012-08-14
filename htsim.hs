@@ -5,6 +5,7 @@ import Data.Binary.Get
 import Data.ByteString.Lazy
 import Text.Printf
 import System.Environment
+import System.IO
 
 readFile :: Get [Instruction]
 readFile = do
@@ -79,6 +80,10 @@ instance Show Instruction where
       Mode10 -> fmt "[%s] <- %s %s 0x%08x + %s"
       Mode11 -> fmt "%s -> [%s %s 0x%08x + %s]"
    where fmt s = printf s (show dst) (show src1) (show oper) im (show src2)
+
+evalInstruction :: State -> Instruction -> IO State
+evalInstruction s insn = do hPrintf stdout "executing %s\n" (show insn)
+                            return (s)
 
 toInstruction :: Word32 -> Instruction
 toInstruction 0xffffffff = Illegal
