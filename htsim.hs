@@ -5,13 +5,12 @@ import Data.ByteString.Lazy
 import Text.Printf
 import System.Environment
 
-readHeader :: Get (Word32, Word32, Word32)
+readHeader :: Get (Word32, Word32)
 readHeader = do
   magic   <- getWord32be
-  version <- getWord32be
   flags   <- getWord32be
   rec_count <- getWord32be -- discard for now
-  return (magic, version, flags)
+  return (magic, flags)
 
 main :: IO ()
 main = do argv <- getArgs
