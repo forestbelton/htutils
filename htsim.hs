@@ -72,26 +72,34 @@ data Register = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P de
 
 data AddrMode = Mode00 | Mode01 | Mode10 | Mode11 deriving (Eq, Enum)
 
-data Instruction = Illegal | Instruction { addr :: AddrMode, op :: Operation, z :: Register, x :: Register, y :: Register, imm :: Word32}
+data Instruction = Illegal | Instruction { useImm :: Bool, addr :: AddrMode, op :: Operation, z :: Register, x :: Register, y :: Register, imm :: Word32}
 instance Show Instruction where
   show Illegal = "illegal"
-  show Instruction {addr=mode, op=oper, z=dst, x=src1, y=src2, imm=im} =
+  show Instruction {useImm=False, addr=mode, op=oper, z=dst, x=src1, y=src2, imm=im} =
     case mode of
       Mode00 -> fmt "%s <- %s %s %s + 0x%08x"
       Mode01 -> fmt "%s <- [%s %s %s + 0x%08x]"
       Mode10 -> fmt "[%s] <- %s %s %s + 0x%08x"
       Mode11 -> fmt "%s -> [%s %s %s + 0x%08x]"
    where fmt s = printf s (show dst) (show src1) (show oper) (show src2) im
+  show Instruction {useImm=True, addr=mode, op=oper, z=dst, x=src1, y=src2, imm=im} =
+    case mode of
+      Mode00 -> fmt "%s <- %s %s 0x%08x + %s"
+      Mode01 -> fmt "%s <- [%s %s 0x%08x + %s]"
+      Mode10 -> fmt "[%s] <- %s %s 0x%08x + %s"
+      Mode11 -> fmt "%s -> [%s %s 0x%08x + %s]"
+   where fmt s = printf s (show dst) (show src1) (show oper) im (show src2)
 
 toInstruction :: Word32 -> Instruction
 toInstruction 0xffffffff = Illegal
-toInstruction w = Instruction (toEnum mode) (toEnum oper) (toEnum dst) (toEnum src1) (toEnum src2) imm
-  where mode = fromIntegral $ extract w 28 2
-        dst  = fromIntegral $ extract w 24 4
-        src1 = fromIntegral $ extract w 20 4
-        src2 = fromIntegral $ extract w 16 4
-        oper = fromIntegral $ extract w 12 4
-        imm  = sex $ extract w 0 12
+toInstruction w = Instruction useImm (toEnum mode) (toEnum oper) (toEnum dst) (toEnum src2) (toEnum src2) imm
+        where useImm = (extract w 30 2) == 1
+              mode   = fromIntegral $ extract w 28 2
+              dst    = fromIntegral $ extract w 24 4
+              src1   = fromIntegral $ extract w 20 4
+              src2   = fromIntegral $ extract w 16 4
+              oper   = fromIntegral $ extract w 12 4
+              imm    = sex $ extract w 0 12
 
 data State = State { a :: Word32, b :: Word32,
                      c :: Word32, d :: Word32,
