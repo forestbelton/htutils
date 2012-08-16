@@ -6,6 +6,7 @@ import Data.ByteString.Lazy
 import Text.Printf
 import System.Environment
 import System.IO
+import Debug.Trace
 
 readFile :: Get [Instruction]
 readFile = do
@@ -23,7 +24,9 @@ main = do argv <- getArgs
           let file = Prelude.head argv
           raw_data <- Data.ByteString.Lazy.readFile file
           let d = runGet Main.readFile raw_data
-          print d
+          Prelude.foldl (liftM2 evalInstruction) (return (State {})) (return d)
+--          Prelude.foldl (liftM2 evalInstruction) (return (State {})) d
+--          Prelude.foldl evalInstruction (State {}) d
           return ()
 
 data Operation = OP_BITWISE_OR          |
@@ -81,9 +84,8 @@ instance Show Instruction where
       Mode11 -> fmt "%s -> [%s %s 0x%08x + %s]"
    where fmt s = printf s (show dst) (show src1) (show oper) im (show src2)
 
-evalInstruction :: State -> Instruction -> IO State
-evalInstruction s insn = do hPrintf stdout "executing %s\n" (show insn)
-                            return (s)
+evalInstruction :: State -> Instruction -> State
+evalInstruction s insn = trace ("executing " ++ (show insn) ++ "\n") $ s
 
 toInstruction :: Word32 -> Instruction
 toInstruction 0xffffffff = Illegal
