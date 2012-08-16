@@ -33,6 +33,7 @@ data Operation = OP_BITWISE_OR          |
                  OP_BITWISE_AND         |
                  OP_ADD                 |
                  OP_MULTIPLY            |
+                 OP_RESERVED0           |
                  OP_SHIFT_LEFT          |
                  OP_COMPARE_LT          |
                  OP_COMPARE_EQ          |
@@ -42,7 +43,8 @@ data Operation = OP_BITWISE_OR          |
                  OP_SUBTRACT            |
                  OP_BITWISE_XORN        |
                  OP_SHIFT_RIGHT_LOGICAL |
-                 OP_COMPARE_NE deriving Enum
+                 OP_COMPARE_NE          |
+                 OP_RESERVED1 deriving Enum
 
 instance Show Operation where
   show oper =
