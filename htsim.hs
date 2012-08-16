@@ -24,7 +24,7 @@ main = do argv <- getArgs
           let file = Prelude.head argv
           raw_data <- Data.ByteString.Lazy.readFile file
           let d = runGet Main.readFile raw_data
-          Prelude.foldl (liftM2 evalInstruction) (return (State {})) (return d)
+          Prelude.foldl (liftM2 evalInstruction) (return (State {})) (Prelude.map return d)
 --          Prelude.foldl (liftM2 evalInstruction) (return (State {})) d
 --          Prelude.foldl evalInstruction (State {}) d
           return ()
