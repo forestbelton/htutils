@@ -7,6 +7,7 @@ import Text.Printf
 import System.Environment
 import System.IO
 import Debug.Trace
+import Data.Map
 
 readFile :: Get [Instruction]
 readFile = do
@@ -24,7 +25,7 @@ main = do argv <- getArgs
           let file = Prelude.head argv
           raw_data <- Data.ByteString.Lazy.readFile file
           let d = runGet Main.readFile raw_data
-          Prelude.foldl (liftM2 evalInstruction) (return (State {})) (Prelude.map return d)
+          Prelude.foldl (liftM2 evalInstruction) (return Data.Map.empty) (Prelude.map return d)
           return ()
 
 data Operation = OP_BITWISE_OR          |
@@ -98,14 +99,7 @@ toInstruction w = Instruction useImm (toEnum mode) (toEnum oper) (toEnum dst) (t
               oper   = fromIntegral $ extract w 12 4
               imm    = sex $ extract w 0 12
 
-data State = State { a :: Word32, b :: Word32,
-                     c :: Word32, d :: Word32,
-                     e :: Word32, f :: Word32,
-                     g :: Word32, h :: Word32,
-                     i :: Word32, l :: Word32,
-                     m :: Word32, n :: Word32,
-                     o :: Word32, p :: Word32
-                   }
+type State = Map Register Word32
 
 extract :: Word32 -> Int -> Int -> Word32
 extract word start len = (shiftR word start) .&. (shiftL 1 len - 1)
