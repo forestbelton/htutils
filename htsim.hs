@@ -63,7 +63,7 @@ instance Show Operation where
       OP_SHIFT_RIGHT_LOGICAL -> ">>"
       OP_COMPARE_NE          -> "/="
 
-data Register = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P deriving (Show, Enum)
+data Register = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P deriving (Show, Enum, Eq, Ord)
 
 data AddrMode = Mode00 | Mode01 | Mode10 | Mode11 deriving (Eq, Enum)
 
