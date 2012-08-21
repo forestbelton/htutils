@@ -87,7 +87,7 @@ instance Show Instruction where
    where fmt s = printf s (show dst) (show src1) (show oper) im (show src2)
 
 evalInstruction :: State -> Instruction -> State
-evalInstruction s insn = evalInstruction' (addr insn)
+evalInstruction s insn = trace (show insn) $ evalInstruction' (addr insn)
     where oper = evalOp (op insn)
           dst  = findWithDefault 0 (z insn) s
           src1 = findWithDefault 0 (x insn) s
