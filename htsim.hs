@@ -26,7 +26,7 @@ main = do argv <- getArgs
           let file = Prelude.head argv
           raw_data <- Data.ByteString.Lazy.readFile file
           let d = runGet Main.readFile raw_data
-          m <- Prelude.foldl showInstruction (return Data.Map.empty) (Prelude.map return d)
+          m <- showInstruction (return Data.Map.empty) (Prelude.map return d)
           System.IO.putStrLn (show m)
           return ()
 
@@ -87,10 +87,10 @@ instance Show Instruction where
       Mode11 -> fmt "%s -> [%s %s 0x%08x + %s]"
    where fmt s = printf s (show dst) (show src1) (show oper) im (show src2)
 
-showInstruction :: IO State -> IO Instruction -> IO State
-showInstruction s insn = do str <- fmap show insn
-                            System.IO.putStrLn str
-                            (liftM2 evalInstruction) s insn
+showInstruction s [] = s
+showInstruction s (x:xs) = do str <- fmap show x
+                              System.IO.putStrLn str
+                              showInstruction (liftM2 evalInstruction s x) xs
 
 evalInstruction :: State -> Instruction -> State
 evalInstruction s insn = evalInstruction' (addr insn)
