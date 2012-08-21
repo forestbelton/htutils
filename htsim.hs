@@ -1,4 +1,5 @@
 import Control.Monad
+import Control.Applicative
 import Data.Bits
 import Data.Word
 import Data.Binary.Get
@@ -24,8 +25,8 @@ main :: IO ()
 main = do argv <- getArgs
           let file = Prelude.head argv
           raw_data <- Data.ByteString.Lazy.readFile file
-          let d = Prelude.reverse (runGet Main.readFile raw_data)
-          m <- Prelude.foldl (liftM2 evalInstruction) (return Data.Map.empty) (Prelude.map return d)
+          let d = runGet Main.readFile raw_data
+          m <- Prelude.foldl showInstruction (return Data.Map.empty) (Prelude.map return d)
           System.IO.putStrLn (show m)
           return ()
 
@@ -86,8 +87,13 @@ instance Show Instruction where
       Mode11 -> fmt "%s -> [%s %s 0x%08x + %s]"
    where fmt s = printf s (show dst) (show src1) (show oper) im (show src2)
 
+showInstruction :: IO State -> IO Instruction -> IO State
+showInstruction s insn = do str <- fmap show insn
+                            System.IO.putStrLn str
+                            (liftM2 evalInstruction) s insn
+
 evalInstruction :: State -> Instruction -> State
-evalInstruction s insn = trace (show insn) $ evalInstruction' (addr insn)
+evalInstruction s insn = evalInstruction' (addr insn)
     where oper = evalOp (op insn)
           dst  = findWithDefault 0 (z insn) s
           src1 = findWithDefault 0 (x insn) s
