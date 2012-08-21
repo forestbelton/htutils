@@ -91,7 +91,7 @@ evalInstruction s insn
     case (addr insn) of
       Mode00 -> insert (z insn) (evalOp (op insn) (findWithDefault 0 (x insn) s) (imm insn) (findWithDefault 0 (y insn) s)) s
       Mode01 -> insert (z insn) (getMem (evalOp (op insn) (findWithDefault 0 (x insn) s) (imm insn) (findWithDefault 0 (y insn) s)) s) s
-      Mode10 -> setMem (getMem (findWithDefault 0 (z insn) s) s) (evalOp (op insn) (findWithDefault 0 (x insn) s) (imm insn) (findWithDefault 0 (y insn) s)) s
+      Mode10 -> setMem (findWithDefault 0 (z insn) s) (evalOp (op insn) (findWithDefault 0 (x insn) s) (imm insn) (findWithDefault 0 (y insn) s)) s
       Mode11 -> setMem (evalOp (op insn) (findWithDefault 0 (x insn) s) (imm insn) (findWithDefault 0 (y insn) s)) (findWithDefault 0 (z insn) s) s
   | otherwise              = s
 
