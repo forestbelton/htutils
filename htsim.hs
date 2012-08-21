@@ -89,11 +89,16 @@ evalInstruction :: State -> Instruction -> State
 evalInstruction s insn
   | (useImm insn == True)  =
     case (addr insn) of
-      Mode00 -> insert (z insn) (evalOp (op insn) (findWithDefault 0 (x insn) s) (imm insn) (findWithDefault 0 (y insn) s)) s
-      Mode01 -> insert (z insn) (getMem (evalOp (op insn) (findWithDefault 0 (x insn) s) (imm insn) (findWithDefault 0 (y insn) s)) s) s
-      Mode10 -> setMem (findWithDefault 0 (z insn) s) (evalOp (op insn) (findWithDefault 0 (x insn) s) (imm insn) (findWithDefault 0 (y insn) s)) s
-      Mode11 -> setMem (evalOp (op insn) (findWithDefault 0 (x insn) s) (imm insn) (findWithDefault 0 (y insn) s)) (findWithDefault 0 (z insn) s) s
+      Mode00 -> insert (z insn) (oper src1 im src2) s
+      Mode01 -> insert (z insn) (getMem (oper src1 im src2) s) s
+      Mode10 -> setMem dst (oper src1 im src2) s
+      Mode11 -> setMem (oper src1 im src2) dst s
   | otherwise              = s
+    where oper = evalOp (op insn)
+          dst  = findWithDefault 0 (z insn) s
+          src1 = findWithDefault 0 (x insn) s
+          src2 = findWithDefault 0 (y insn) s
+          im   = imm insn
 
 getMem :: Word32 -> State -> Word32
 getMem a s = 0
