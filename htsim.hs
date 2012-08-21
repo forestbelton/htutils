@@ -86,19 +86,17 @@ instance Show Instruction where
    where fmt s = printf s (show dst) (show src1) (show oper) im (show src2)
 
 evalInstruction :: State -> Instruction -> State
-evalInstruction s insn
-  | (useImm insn == True)  =
-    case (addr insn) of
-      Mode00 -> insert (z insn) (oper src1 im src2) s
-      Mode01 -> insert (z insn) (getMem (oper src1 im src2) s) s
-      Mode10 -> setMem dst (oper src1 im src2) s
-      Mode11 -> setMem (oper src1 im src2) dst s
-  | otherwise              = s
+evalInstruction s insn = evalInstruction' (addr insn)
     where oper = evalOp (op insn)
           dst  = findWithDefault 0 (z insn) s
           src1 = findWithDefault 0 (x insn) s
           src2 = findWithDefault 0 (y insn) s
           im   = imm insn
+          f    = if (useImm insn) then (oper src1 im src2) else (oper src1 src2 im)
+          evalInstruction' Mode00 = insert (z insn) f s
+          evalInstruction' Mode01 = insert (z insn) (getMem f s) s
+          evalInstruction' Mode10 = setMem dst f s
+          evalInstruction' Mode11 = setMem f dst s
 
 getMem :: Word32 -> State -> Word32
 getMem a s = 0
