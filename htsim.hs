@@ -24,7 +24,7 @@ main :: IO ()
 main = do argv <- getArgs
           let file = Prelude.head argv
           raw_data <- Data.ByteString.Lazy.readFile file
-          let d = runGet Main.readFile raw_data
+          let d = Prelude.reverse (runGet Main.readFile raw_data)
           m <- Prelude.foldl (liftM2 evalInstruction) (return Data.Map.empty) (Prelude.map return d)
           System.IO.putStrLn (show m)
           return ()
