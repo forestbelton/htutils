@@ -86,7 +86,20 @@ instance Show Instruction where
    where fmt s = printf s (show dst) (show src1) (show oper) im (show src2)
 
 evalInstruction :: State -> Instruction -> State
-evalInstruction s insn = trace ("executing " ++ (show insn) ++ "\n") $ s
+evalInstruction s insn
+  | (useImm insn == True)  =
+    case (addr insn) of
+      Mode00 -> insert (z insn) (evalOp (op insn) (findWithDefault 0 (x insn) s) (imm insn) (findWithDefault 0 (y insn) s)) s
+      Mode01 -> insert (z insn) (getMem (evalOp (op insn) (findWithDefault 0 (x insn) s) (imm insn) (findWithDefault 0 (y insn) s)) s) s
+      Mode10 -> setMem (getMem (findWithDefault 0 (z insn) s) s) (evalOp (op insn) (findWithDefault 0 (x insn) s) (imm insn) (findWithDefault 0 (y insn) s)) s
+      Mode11 -> setMem (evalOp (op insn) (findWithDefault 0 (x insn) s) (imm insn) (findWithDefault 0 (y insn) s)) (findWithDefault 0 (z insn) s) s
+  | otherwise              = s
+
+getMem :: Word32 -> State -> Word32
+getMem a s = 0
+
+setMem :: Word32 -> Word32 -> State -> State
+setMem a w s = s 
 
 toInstruction :: Word32 -> Instruction
 toInstruction 0xffffffff = Illegal
