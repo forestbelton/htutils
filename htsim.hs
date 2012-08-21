@@ -107,7 +107,7 @@ setMem a w s = s
 
 toInstruction :: Word32 -> Instruction
 toInstruction 0xffffffff = Illegal
-toInstruction w = Instruction useImm (toEnum mode) (toEnum oper) (toEnum dst) (toEnum src2) (toEnum src2) imm
+toInstruction w = Instruction useImm (toEnum mode) (toEnum oper) (toEnum dst) (toEnum src1) (toEnum src2) imm
         where useImm = (extract w 30 2) == 1
               mode   = fromIntegral $ extract w 28 2
               dst    = fromIntegral $ extract w 24 4
