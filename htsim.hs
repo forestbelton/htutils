@@ -87,11 +87,6 @@ runCode insn state = do let s1 = setRegister P (getRegister P state + 1) state
                         let newInsn = toInstruction $ getMem (getRegister P s2) s2
                         runCode newInsn s2
 
-showInstruction s [] = s
-showInstruction s (x:xs) = do str <- fmap show x
-                              putStrLn str
-                              showInstruction (liftM2 evalInstruction s x) xs
-
 evalInstruction :: State -> Instruction -> State
 evalInstruction s insn = evalInstruction' (addr insn)
     where oper = evalOp (op insn)
