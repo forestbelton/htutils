@@ -34,8 +34,7 @@ loadState (x:xs) w s = loadState xs (w+1) (setMem w x s)
 
 main :: IO ()
 main = do argv <- getArgs
-          let file = head argv
-          raw_data <- BL.readFile file
+          raw_data <- BL.readFile $ head argv
           let insns = runGet Main.readFile raw_data
           let inistate = (Data.Map.empty, Data.Map.empty)
           let loadstate = loadState insns 0x1000 inistate
