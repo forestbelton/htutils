@@ -23,12 +23,9 @@ type State = (Map Register Word32, Map Word32 Word32)
 
 readFile :: Get [Word32]
 readFile = do
-  magic   <- getWord32le
-  flags   <- getWord32le
-  rec_count <- getWord32le -- discard for now
-  address <- getWord32le
-  size    <- getWord32le
-  insns   <- replicateM (fromIntegral size) getWord32le
+  skip (4 * 4) -- skip past the header
+  size  <- getWord32le
+  insns <- replicateM (fromIntegral size) getWord32le
   return insns
 
 loadState :: [Word32] -> Word32 -> State -> State
@@ -44,7 +41,7 @@ main = do argv <- getArgs
           let loadstate = loadState insns 0x1000 inistate
           let first = toInstruction $ getMem 0x1000 loadstate
           let m = runCode first (setRegister P 0x1000 loadstate)
-          putStrLn (show m)
+          putStrLn (show $ fst m)
 
 runCode :: Instruction -> State -> State
 runCode Illegal state = state
