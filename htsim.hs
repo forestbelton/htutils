@@ -30,7 +30,7 @@ readFile = do
   address <- getWord32le
   size    <- getWord32le
   insns   <- replicateM (fromIntegral size) getWord32le
-  return (insns)
+  return insns
 
 loadState :: [Word32] -> Word32 -> State -> State
 loadState [] _w s = s
