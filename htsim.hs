@@ -3,7 +3,6 @@ import Data.Bits
 import Data.Word
 import Data.Binary.Get
 import qualified Data.ByteString.Lazy as BL
-import Text.Printf
 import System.Environment
 import System.IO
 import Data.Map
