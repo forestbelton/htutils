@@ -8,6 +8,18 @@ import System.Environment
 import System.IO
 import Data.Map
 
+data Operation = OP_BIT_OR    | OP_BIT_AND  | OP_ADD     | OP_MUL
+               | OP_RESERVED0 | OP_SHIFTL   | OP_LT      | OP_EQ
+               | OP_GT        | OP_BIT_ANDN | OP_BIT_XOR | OP_SUB
+               | OP_BIT_XORN  | OP_SHIFTR   | OP_NEQ     | OP_RESERVED1
+  deriving Enum
+
+data Register = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P deriving (Enum, Eq, Ord)
+
+data AddrMode = Mode00 | Mode01 | Mode10 | Mode11 deriving (Eq, Enum)
+
+data Instruction = Illegal | Instruction { useImm :: Bool, addr :: AddrMode, op :: Operation, z :: Register, x :: Register, y :: Register, imm :: Word32}
+
 readFile :: Get [Word32]
 readFile = do
   magic   <- getWord32le
@@ -33,18 +45,6 @@ main = do argv <- getArgs
           let m = runCode first (setRegister P 0x1000 loadstate)
           putStrLn (show m)
           return ()
-
-data Operation = OP_BIT_OR    | OP_BIT_AND  | OP_ADD     | OP_MUL
-               | OP_RESERVED0 | OP_SHIFTL   | OP_LT      | OP_EQ
-               | OP_GT        | OP_BIT_ANDN | OP_BIT_XOR | OP_SUB
-               | OP_BIT_XORN  | OP_SHIFTR   | OP_NEQ     | OP_RESERVED1
-  deriving Enum
-
-data Register = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P deriving (Enum, Eq, Ord)
-
-data AddrMode = Mode00 | Mode01 | Mode10 | Mode11 deriving (Eq, Enum)
-
-data Instruction = Illegal | Instruction { useImm :: Bool, addr :: AddrMode, op :: Operation, z :: Register, x :: Register, y :: Register, imm :: Word32}
 
 runCode :: Instruction -> State -> State
 runCode Illegal state = state
