@@ -26,7 +26,7 @@ main = do argv <- getArgs
           let file = Prelude.head argv
           raw_data <- Data.ByteString.Lazy.readFile file
           let d = runGet Main.readFile raw_data
-          m <- showInstruction (return Data.Map.empty) (Prelude.map return d)
+          m <- showInstruction (return (Data.Map.empty, Data.Map.empty)) (Prelude.map return d)
           System.IO.putStrLn (show m)
           return ()
 
@@ -95,21 +95,31 @@ showInstruction s (x:xs) = do str <- fmap show x
 evalInstruction :: State -> Instruction -> State
 evalInstruction s insn = evalInstruction' (addr insn)
     where oper = evalOp (op insn)
-          dst  = findWithDefault 0 (z insn) s
-          src1 = findWithDefault 0 (x insn) s
-          src2 = findWithDefault 0 (y insn) s
+          dst  = getRegister (z insn) s
+          src1 = getRegister (x insn) s
+          src2 = getRegister (y insn) s
           im   = imm insn
           f    = if (useImm insn) then (oper src1 im src2) else (oper src1 src2 im)
-          evalInstruction' Mode00 = insert (z insn) f s
-          evalInstruction' Mode01 = insert (z insn) (getMem f s) s
+          evalInstruction' Mode00 = setRegister (z insn) f s
+          evalInstruction' Mode01 = setRegister (z insn) (getMem f s) s
           evalInstruction' Mode10 = setMem dst f s
           evalInstruction' Mode11 = setMem f dst s
 
+type State    = (Map Register Word32, Map Word32 Word32)
+
+getRegister :: Register -> State -> Word32
+getRegister A   = \_ -> 0
+getRegister reg = (findWithDefault 0 reg) . fst
+
+setRegister :: Register -> Word32 -> State -> State
+setRegister A _value state  = state
+setRegister reg value state = (insert reg value (fst state), snd state)
+
 getMem :: Word32 -> State -> Word32
-getMem a s = 0
+getMem address = (findWithDefault 0 address) . snd
 
 setMem :: Word32 -> Word32 -> State -> State
-setMem a w s = s 
+setMem address value state = (fst state, insert address value (snd state))
 
 toInstruction :: Word32 -> Instruction
 toInstruction 0xffffffff = Illegal
@@ -121,8 +131,6 @@ toInstruction w = Instruction useImm (toEnum mode) (toEnum oper) (toEnum dst) (t
               src2   = fromIntegral $ extract w 16 4
               oper   = fromIntegral $ extract w 12 4
               imm    = sex $ extract w 0 12
-
-type State = Map Register Word32
 
 extract :: Word32 -> Int -> Int -> Word32
 extract word start len = (shiftR word start) .&. (shiftL 1 len - 1)
