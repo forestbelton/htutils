@@ -40,7 +40,7 @@ data Operation = OP_BIT_OR    | OP_BIT_AND  | OP_ADD     | OP_MUL
                | OP_BIT_XORN  | OP_SHIFTR   | OP_NEQ     | OP_RESERVED1
   deriving Enum
 
-data Register = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P deriving (Show, Enum, Eq, Ord)
+data Register = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P deriving (Enum, Eq, Ord)
 
 data AddrMode = Mode00 | Mode01 | Mode10 | Mode11 deriving (Eq, Enum)
 
