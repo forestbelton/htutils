@@ -20,6 +20,8 @@ data AddrMode = Mode00 | Mode01 | Mode10 | Mode11 deriving (Eq, Enum)
 
 data Instruction = Illegal | Instruction { useImm :: Bool, addr :: AddrMode, op :: Operation, z :: Register, x :: Register, y :: Register, imm :: Word32}
 
+type State = (Map Register Word32, Map Word32 Word32)
+
 readFile :: Get [Word32]
 readFile = do
   magic   <- getWord32le
@@ -65,8 +67,6 @@ evalInstruction s insn = evalInstruction' (addr insn)
           evalInstruction' Mode01 = setRegister (z insn) (getMem f s) s
           evalInstruction' Mode10 = setMem dst f s
           evalInstruction' Mode11 = setMem f dst s
-
-type State = (Map Register Word32, Map Word32 Word32)
 
 getRegister :: Register -> State -> Word32
 getRegister A   = \_ -> 0
