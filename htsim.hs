@@ -2,7 +2,7 @@ import Control.Monad
 import Data.Bits
 import Data.Word
 import Data.Binary.Get
-import Data.ByteString.Lazy
+import qualified Data.ByteString.Lazy as BL
 import Text.Printf
 import System.Environment
 import System.IO
@@ -24,14 +24,14 @@ loadState (x:xs) w s = loadState xs (w+1) (setMem w x s)
 
 main :: IO ()
 main = do argv <- getArgs
-          let file = Prelude.head argv
-          raw_data <- Data.ByteString.Lazy.readFile file
+          let file = head argv
+          raw_data <- BL.readFile file
           let insns = runGet Main.readFile raw_data
           let inistate = (Data.Map.empty, Data.Map.empty)
           let loadstate = loadState insns 0x1000 inistate
           let first = toInstruction $ getMem 0x1000 loadstate
           let m = runCode first (setRegister P 0x1000 loadstate)
-          System.IO.putStrLn (show m)
+          putStrLn (show m)
           return ()
 
 data Operation = OP_BITWISE_OR          |
@@ -100,7 +100,7 @@ runCode insn state = do let s1 = setRegister P (getRegister P state + 1) state
 
 showInstruction s [] = s
 showInstruction s (x:xs) = do str <- fmap show x
-                              System.IO.putStrLn str
+                              putStrLn str
                               showInstruction (liftM2 evalInstruction s x) xs
 
 evalInstruction :: State -> Instruction -> State
