@@ -45,7 +45,6 @@ main = do argv <- getArgs
           let first = toInstruction $ getMem 0x1000 loadstate
           let m = runCode first (setRegister P 0x1000 loadstate)
           putStrLn (show m)
-          return ()
 
 runCode :: Instruction -> State -> State
 runCode Illegal state = state
