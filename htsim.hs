@@ -68,13 +68,13 @@ getRegister reg = (findWithDefault 0 reg) . fst
 
 setRegister :: Register -> Word32 -> State -> State
 setRegister A _value state  = state
-setRegister reg value state = (insert reg value (fst state), snd state)
+setRegister reg value (regs, mem) = (insert reg value regs, mem)
 
 getMem :: Word32 -> State -> Word32
 getMem address = (findWithDefault 0 address) . snd
 
 setMem :: Word32 -> Word32 -> State -> State
-setMem address value state = (fst state, insert address value (snd state))
+setMem address value (regs, mem) = (regs, insert address value mem)
 
 toInstruction :: Word32 -> Instruction
 toInstruction 0xffffffff = Illegal
