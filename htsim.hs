@@ -100,7 +100,7 @@ evalInstruction s insn = evalInstruction' (addr insn)
           evalInstruction' Mode10 = setMem dst f s
           evalInstruction' Mode11 = setMem f dst s
 
-type State    = (Map Register Word32, Map Word32 Word32)
+type State = (Map Register Word32, Map Word32 Word32)
 
 getRegister :: Register -> State -> Word32
 getRegister A   = \_ -> 0
