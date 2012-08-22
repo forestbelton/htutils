@@ -45,22 +45,6 @@ data Register = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P de
 data AddrMode = Mode00 | Mode01 | Mode10 | Mode11 deriving (Eq, Enum)
 
 data Instruction = Illegal | Instruction { useImm :: Bool, addr :: AddrMode, op :: Operation, z :: Register, x :: Register, y :: Register, imm :: Word32}
-instance Show Instruction where
-  show Illegal = "illegal"
-  show Instruction {useImm=False, addr=mode, op=oper, z=dst, x=src1, y=src2, imm=im} =
-    case mode of
-      Mode00 -> fmt "%s <- %s %s %s + 0x%08x"
-      Mode01 -> fmt "%s <- [%s %s %s + 0x%08x]"
-      Mode10 -> fmt "[%s] <- %s %s %s + 0x%08x"
-      Mode11 -> fmt "%s -> [%s %s %s + 0x%08x]"
-   where fmt s = printf s (show dst) (show src1) (show oper) (show src2) im
-  show Instruction {useImm=True, addr=mode, op=oper, z=dst, x=src1, y=src2, imm=im} =
-    case mode of
-      Mode00 -> fmt "%s <- %s %s 0x%08x + %s"
-      Mode01 -> fmt "%s <- [%s %s 0x%08x + %s]"
-      Mode10 -> fmt "[%s] <- %s %s 0x%08x + %s"
-      Mode11 -> fmt "%s -> [%s %s 0x%08x + %s]"
-   where fmt s = printf s (show dst) (show src1) (show oper) im (show src2)
 
 runCode :: Instruction -> State -> State
 runCode Illegal state = state
