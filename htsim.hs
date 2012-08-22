@@ -10,7 +10,7 @@ import System.IO
 import Debug.Trace
 import Data.Map
 
-readFile :: Get [Instruction]
+readFile :: Get [Word32]
 readFile = do
   magic   <- getWord32le
   flags   <- getWord32le
@@ -18,15 +18,21 @@ readFile = do
   address <- getWord32le
   size    <- getWord32le
   insns   <- replicateM (fromIntegral size) getWord32le
-  let decoded = Prelude.map toInstruction insns
-  return (decoded)
+  return (insns)
+
+loadState :: [Word32] -> Word32 -> State -> State
+loadState [] _w s = s
+loadState (x:xs) w s = loadState xs (w+1) (setMem w x s)
 
 main :: IO ()
 main = do argv <- getArgs
           let file = Prelude.head argv
           raw_data <- Data.ByteString.Lazy.readFile file
-          let d = runGet Main.readFile raw_data
-          m <- showInstruction (return (Data.Map.empty, Data.Map.empty)) (Prelude.map return d)
+          let insns = runGet Main.readFile raw_data
+          let inistate = (Data.Map.empty, Data.Map.empty)
+          let loadstate = loadState insns 0x1000 inistate
+          let first = toInstruction $ getMem 0x1000 loadstate
+          let m = runCode first (setRegister P 0x1000 loadstate)
           System.IO.putStrLn (show m)
           return ()
 
@@ -86,6 +92,13 @@ instance Show Instruction where
       Mode10 -> fmt "[%s] <- %s %s 0x%08x + %s"
       Mode11 -> fmt "%s -> [%s %s 0x%08x + %s]"
    where fmt s = printf s (show dst) (show src1) (show oper) im (show src2)
+
+runCode :: Instruction -> State -> State
+runCode Illegal state = state
+runCode insn state = do let s1 = setRegister P (getRegister P state + 1) state
+                        let s2 = evalInstruction s1 insn
+                        let newInsn = toInstruction $ getMem (getRegister P s2) s2
+                        runCode newInsn s2
 
 showInstruction s [] = s
 showInstruction s (x:xs) = do str <- fmap show x
