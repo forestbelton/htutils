@@ -1,5 +1,4 @@
 import Control.Monad
-import Control.Applicative
 import Data.Bits
 import Data.Word
 import Data.Binary.Get
@@ -7,7 +6,6 @@ import Data.ByteString.Lazy
 import Text.Printf
 import System.Environment
 import System.IO
-import Debug.Trace
 import Data.Map
 
 readFile :: Get [Word32]
