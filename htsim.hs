@@ -34,40 +34,29 @@ main = do argv <- getArgs
           putStrLn (show m)
           return ()
 
-data Operation = OP_BITWISE_OR          |
-                 OP_BITWISE_AND         |
-                 OP_ADD                 |
-                 OP_MULTIPLY            |
-                 OP_RESERVED0           |
-                 OP_SHIFT_LEFT          |
-                 OP_COMPARE_LT          |
-                 OP_COMPARE_EQ          |
-                 OP_COMPARE_GT          |
-                 OP_BITWISE_ANDN        |
-                 OP_BITWISE_XOR         |
-                 OP_SUBTRACT            |
-                 OP_BITWISE_XORN        |
-                 OP_SHIFT_RIGHT_LOGICAL |
-                 OP_COMPARE_NE          |
-                 OP_RESERVED1 deriving Enum
+data Operation = OP_BIT_OR    | OP_BIT_AND  | OP_ADD     | OP_MUL
+               | OP_RESERVED0 | OP_SHIFTL   | OP_LT      | OP_EQ
+               | OP_GT        | OP_BIT_ANDN | OP_BIT_XOR | OP_SUB
+               | OP_BIT_XORN  | OP_SHIFTR   | OP_NEQ     | OP_RESERVED1
+  deriving Enum
 
 instance Show Operation where
   show oper =
     case oper of
-      OP_BITWISE_OR          -> "|"
-      OP_BITWISE_AND         -> "&"
-      OP_ADD                 -> "+"
-      OP_MULTIPLY            -> "*"
-      OP_SHIFT_LEFT          -> "<<"
-      OP_COMPARE_LT          -> "<"
-      OP_COMPARE_EQ          -> "=="
-      OP_COMPARE_GT          -> ">"
-      OP_BITWISE_ANDN        -> "&~"
-      OP_BITWISE_XOR         -> "^"
-      OP_SUBTRACT            -> "-"
-      OP_BITWISE_XORN        -> "^~"
-      OP_SHIFT_RIGHT_LOGICAL -> ">>"
-      OP_COMPARE_NE          -> "/="
+      OP_BIT_OR   -> "|"
+      OP_BIT_AND  -> "&"
+      OP_ADD      -> "+"
+      OP_MUL      -> "*"
+      OP_SHIFTL   -> "<<"
+      OP_LT       -> "<"
+      OP_EQ       -> "=="
+      OP_GT       -> ">"
+      OP_BIT_ANDN -> "&~"
+      OP_BIT_XOR  -> "^"
+      OP_SUB      -> "-"
+      OP_BIT_XORN -> "^~"
+      OP_SHIFTR   -> ">>"
+      OP_NEQ      -> "/="
 
 data Register = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P deriving (Show, Enum, Eq, Ord)
 
@@ -164,18 +153,18 @@ foo = xor 0x80000000
 getOp :: Operation -> (Word32 -> Word32 -> Word32)
 getOp oper =
   case oper of
-    OP_BITWISE_OR          -> \x y -> x .|. y
-    OP_BITWISE_AND         -> \x y -> x .&. y
-    OP_ADD                 -> \x y -> x + y
-    OP_MULTIPLY            -> \x y -> x * y
-    OP_SHIFT_LEFT          -> \x y -> x * (2 ^ y)
-    OP_COMPARE_LT          -> \x y -> boolToReg (foo x < foo y)
-    OP_COMPARE_EQ          -> \x y -> boolToReg (x == y)
-    OP_COMPARE_GT          -> \x y -> boolToReg (foo x > foo y)
-    OP_BITWISE_ANDN        -> \x y -> x .&. (complement y)
-    OP_BITWISE_XOR         -> \x y -> x `xor` y
-    OP_SUBTRACT            -> \x y -> x - y
-    OP_BITWISE_XORN        -> \x y -> x `xor` (complement y)
-    OP_SHIFT_RIGHT_LOGICAL -> \x y -> x `div` (2 ^ y)
-    OP_COMPARE_NE          -> \x y -> boolToReg (x /= y)
+    OP_BIT_OR   -> \x y -> x .|. y
+    OP_BIT_AND  -> \x y -> x .&. y
+    OP_ADD      -> \x y -> x + y
+    OP_MUL      -> \x y -> x * y
+    OP_SHIFTL   -> \x y -> x * (2 ^ y)
+    OP_LT       -> \x y -> boolToReg (foo x < foo y)
+    OP_EQ       -> \x y -> boolToReg (x == y)
+    OP_GT       -> \x y -> boolToReg (foo x > foo y)
+    OP_BIT_ANDN -> \x y -> x .&. (complement y)
+    OP_BIT_XOR  -> \x y -> x `xor` y
+    OP_SUB      -> \x y -> x - y
+    OP_BIT_XORN -> \x y -> x `xor` (complement y)
+    OP_SHIFTR   -> \x y -> x `div` (2 ^ y)
+    OP_NEQ      -> \x y -> boolToReg (x /= y)
 
