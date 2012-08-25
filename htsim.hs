@@ -6,6 +6,7 @@ import qualified Data.ByteString.Lazy as BL
 import System.Environment
 import System.IO
 import Data.Map
+import Data.Array.Unboxed
 
 data Operation = OP_BIT_OR    | OP_BIT_AND  | OP_ADD     | OP_MUL
                | OP_RESERVED0 | OP_SHIFTL   | OP_LT      | OP_EQ
@@ -13,13 +14,13 @@ data Operation = OP_BIT_OR    | OP_BIT_AND  | OP_ADD     | OP_MUL
                | OP_BIT_XORN  | OP_SHIFTR   | OP_NEQ     | OP_RESERVED1
   deriving Enum
 
-data Register = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P deriving (Enum, Eq, Ord, Show)
+data Register = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P deriving (Enum, Eq, Ord, Ix, Show)
 
 data AddrMode = Mode00 | Mode01 | Mode10 | Mode11 deriving (Eq, Enum)
 
 data Instruction = Illegal | Instruction { useImm :: Bool, addr :: AddrMode, op :: Operation, z :: Register, x :: Register, y :: Register, imm :: Word32}
 
-type State = (Map Register Word32, Map Word32 Word32)
+type State = (Registers, Map Word32 Word32)
 
 readFile :: Get [Word32]
 readFile = do
@@ -36,7 +37,7 @@ main :: IO ()
 main = do argv <- getArgs
           raw_data <- BL.readFile $ head argv
           let insns = runGet Main.readFile raw_data
-          let inistate = (Data.Map.empty, Data.Map.empty)
+          let inistate = (initRegister, Data.Map.empty)
           let loadstate = loadState insns 0x1000 inistate
           let first = toInstruction $ getMem 0x1000 loadstate
           let m = runCode first (setRegister P 0x1000 loadstate)
@@ -62,13 +63,19 @@ evalInstruction s insn = evalInstruction' (addr insn)
           evalInstruction' Mode10 = setMem dst f s
           evalInstruction' Mode11 = setMem f dst s
 
+type Registers = UArray Register Word32
+
+initRegister :: Registers
+initRegister = array (A, P) [(r, 0) | r <- enumFromTo A P]
+
 getRegister :: Register -> State -> Word32
-getRegister A   = \_ -> 0
-getRegister reg = (findWithDefault 0 reg) . fst
+getRegister A   _regs        = 0
+getRegister reg (regs, mem)  = regs Data.Array.Unboxed.! reg
 
 setRegister :: Register -> Word32 -> State -> State
-setRegister A _value state  = state
-setRegister reg value (regs, mem) = (insert reg value regs, mem)
+setRegister A   _word state       = state
+setRegister reg word  (regs, mem) = (regs', mem)
+  where regs' = regs // [(reg, word)]
 
 getMem :: Word32 -> State -> Word32
 getMem address = (findWithDefault 0 address) . snd
@@ -122,4 +129,3 @@ getOp oper =
     OP_BIT_XORN -> \x y -> x `xor` (complement y)
     OP_SHIFTR   -> \x y -> x `div` (2 ^ y)
     OP_NEQ      -> \x y -> boolToReg (x /= y)
-
