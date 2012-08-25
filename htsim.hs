@@ -20,7 +20,6 @@ setReg A   _val  = return ()
 setReg reg val   = do (regs, mem) <- get
                       let regs' = regs UA.// [(reg, val)]
                       put (regs', mem)
-                      return ()
 
 getMem :: Word32 -> CPU Word32
 getMem addr = do (_regs, mem) <- get
@@ -30,7 +29,6 @@ setMem :: Word32 -> Word32 -> CPU ()
 setMem addr val = do (regs, mem) <- get
                      let mem' = insert addr val mem
                      put (regs, mem')
-                     return ()
 
 main :: IO ()
 main = return ()
