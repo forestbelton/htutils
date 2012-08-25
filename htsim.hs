@@ -22,5 +22,9 @@ setReg reg val   = do (regs, mem) <- get
                       put (regs', mem)
                       return ()
 
+getMem :: Word32 -> CPU Word32
+getMem addr = do (_regs, mem) <- get
+                 return $ findWithDefault 0 addr mem
+
 main :: IO ()
 main = return ()
