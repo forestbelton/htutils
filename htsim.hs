@@ -15,5 +15,12 @@ getReg A   = return 0
 getReg reg = do (regs, _mem) <- get
                 return $ regs UA.! reg
 
+setReg :: Register -> Word32 -> CPU ()
+setReg A   _val  = return ()
+setReg reg val   = do (regs, mem) <- get
+                      let regs' = regs UA.// [(reg, val)]
+                      put (regs', mem)
+                      return ()
+
 main :: IO ()
 main = return ()
