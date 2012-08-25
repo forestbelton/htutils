@@ -10,5 +10,10 @@ type Registers = UA.UArray Register Word32
 type Memory    = Map Word32 Word32
 type CPU       = State (Registers, Memory)
 
+getReg :: Register -> CPU Word32
+getReg A   = return 0
+getReg reg = do (regs, _mem) <- get
+                return $ regs UA.! reg
+
 main :: IO ()
 main = return ()
