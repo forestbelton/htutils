@@ -34,5 +34,20 @@ setMem addr val = do
   let mem' = insert addr val mem
   put (regs, mem')
 
+eval :: Word32 -> CPU ()
+eval = \_ -> return ()
+
+runCode :: CPU ()
+runCode = do
+  pc <- liftM (+1) $ getReg P
+  setReg P pc
+  word <- getMem pc
+  case word of
+    0xffffffff ->
+      return ()
+    _ ->
+      do eval word
+         runCode
+
 main :: IO ()
 main = return ()
