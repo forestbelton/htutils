@@ -1,8 +1,11 @@
 import Control.Monad.State
 import qualified Data.Array.Unboxed as UA
+import qualified Data.ByteString.Lazy as BL
+import Data.Binary.Get
 import Data.Bits
 import Data.Map
 import Data.Word
+import System.Environment
 
 data Register  = A | B | C | D | E | F | G | H
                | I | J | K | L | M | N | O | P
@@ -90,5 +93,19 @@ getOp OP_BIT_XORN = \x y -> x `xor` (complement y)
 getOp OP_SHIFTR   = \x y -> x `div` (2 ^ y)
 --getOp OP_NEQ      = \x y -> boolToReg (x /= y)
 
+parse  :: Get (CPU ())
+parse = do skip (4 * 4)
+           size <- getWord32le
+           load size
+           
+-- TODO: load instructions into memory
+load :: Word32 -> Get (CPU ())
+load len = do let regs = UA.array (A, P) []
+                  mem  = Data.Map.empty
+              return $ put (regs, mem)
+
 main :: IO ()
-main = return ()
+main = do argv    <- getArgs
+          bstring <- BL.readFile $ head argv
+          let _n = runGet parse bstring
+          return ()
