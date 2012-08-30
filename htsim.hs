@@ -7,6 +7,9 @@ import Data.Map
 import Data.Word
 import System.Environment
 
+--import Debug.Trace
+--import Numeric
+
 data Register  = A | B | C | D | E | F | G | H
                | I | J | K | L | M | N | O | P
   deriving (Eq, Ord, UA.Ix, Show, Enum)
@@ -70,6 +73,7 @@ runCode = do
   pc <- liftM (+1) $ getReg P
   setReg P pc
   word <- getMem pc
+--  trace ("word: " ++ (showHex word "")) $ return ()
   case word of
     0xffffffff ->
       return ()
@@ -113,9 +117,10 @@ parse = do skip (4 * 4)
 
 boot :: [Word32] -> CPU (Registers, Memory)
 boot insns = do
-  boot' 0x1000 insns
-  runCode
-  get
+  boot' 0x1000 insns    -- Load instructions into memory.
+  setReg P (0x1000 - 1) -- Initialize program counter.
+  runCode               -- Begin program.
+  get                   -- Return final state.
  where boot' addr []     = return ()
        boot' addr (x:xs) = do
          setMem addr x
