@@ -93,19 +93,30 @@ getOp OP_BIT_XORN = \x y -> x `xor` (complement y)
 getOp OP_SHIFTR   = \x y -> x `div` (2 ^ y)
 --getOp OP_NEQ      = \x y -> boolToReg (x /= y)
 
-parse  :: Get (CPU ())
+initCPU :: (Registers, Memory)
+initCPU = (regs, mem)
+  where regs = UA.array (A, P) []
+        mem  = Data.Map.empty
+
+parse  :: Get [Word32]
 parse = do skip (4 * 4)
-           size <- getWord32le
-           load size
-           
--- TODO: load instructions into memory
-load :: Word32 -> Get (CPU ())
-load len = do let regs = UA.array (A, P) []
-                  mem  = Data.Map.empty
-              return $ put (regs, mem)
+           size  <- liftM fromIntegral getWord32le
+           replicateM size getWord32le
+
+boot :: [Word32] -> CPU (Registers, Memory)
+boot insns = do
+  boot' 0x1000 insns
+  runCode
+  get
+ where boot' addr []     = return ()
+       boot' addr (x:xs) = do
+         setMem addr x
+         boot' (addr + 1) xs
 
 main :: IO ()
 main = do argv    <- getArgs
           bstring <- BL.readFile $ head argv
-          let _n = runGet parse bstring
+          let insns       = runGet parse bstring
+          let (regs, mem) = evalState (boot insns) initCPU
+          putStrLn $ show regs
           return ()
