@@ -77,21 +77,29 @@ runCode = do
       do eval word
          runCode
 
+boolToReg :: Bool -> Word32
+boolToReg False = 0x00000000
+boolToReg True  = 0xffffffff
+
+-- TODO: Explain this
+foo :: Word32 -> Word32
+foo = xor 0x80000000
+
 getOp :: Operation -> (Word32 -> Word32 -> Word32)
 getOp OP_BIT_OR   = \x y -> x .|. y
 getOp OP_BIT_AND  = \x y -> x .&. y
 getOp OP_ADD      = \x y -> x + y
 getOp OP_MUL      = \x y -> x * y
 getOp OP_SHIFTL   = \x y -> x * (2 ^ y)
---getOp OP_LT       = \x y -> boolToReg (foo x < foo y)
---getOp OP_EQ       = \x y -> boolToReg (x == y)
---getOp OP_GT       = \x y -> boolToReg (foo x > foo y)
+getOp OP_LT       = \x y -> boolToReg (foo x < foo y)
+getOp OP_EQ       = \x y -> boolToReg (x == y)
+getOp OP_GT       = \x y -> boolToReg (foo x > foo y)
 getOp OP_BIT_ANDN =  \x y -> x .&. (complement y)
 getOp OP_BIT_XOR  = \x y -> x `xor` y
 getOp OP_SUB      = \x y -> x - y
 getOp OP_BIT_XORN = \x y -> x `xor` (complement y)
 getOp OP_SHIFTR   = \x y -> x `div` (2 ^ y)
---getOp OP_NEQ      = \x y -> boolToReg (x /= y)
+getOp OP_NEQ      = \x y -> boolToReg (x /= y)
 
 initCPU :: (Registers, Memory)
 initCPU = (regs, mem)
