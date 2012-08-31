@@ -70,15 +70,17 @@ eval word = case mode of
 
 runCode :: CPU ()
 runCode = do
-  pc <- liftM (+1) $ getReg P
-  setReg P pc
+  pc   <- getReg P
   word <- getMem pc
+  setReg P (pc + 1)
 --  trace ("word: " ++ (showHex word "")) $ return ()
   case word of
     0xffffffff ->
       return ()
     _ ->
       do eval word
+         (regs, _mem) <- get
+--         trace ("regs: " ++ (show regs)) $ return ()
          runCode
 
 boolToReg :: Bool -> Word32
@@ -118,7 +120,7 @@ parse = do skip (4 * 4)
 boot :: [Word32] -> CPU (Registers, Memory)
 boot insns = do
   boot' 0x1000 insns    -- Load instructions into memory.
-  setReg P (0x1000 - 1) -- Initialize program counter.
+  setReg P 0x1000       -- Initialize program counter.
   runCode               -- Begin program.
   get                   -- Return final state.
  where boot' addr []     = return ()
