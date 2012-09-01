@@ -7,44 +7,16 @@ import Data.Map
 import Data.Word
 import System.Environment
 
+import Arch
+
 --import Debug.Trace
 --import Numeric
 
-data Register  = A | B | C | D | E | F | G | H
-               | I | J | K | L | M | N | O | P
-  deriving (Eq, Ord, UA.Ix, Show, Enum)
 data Operation = OP_BIT_OR    | OP_BIT_AND  | OP_ADD     | OP_MUL
                | OP_RESERVED0 | OP_SHIFTL   | OP_LT      | OP_EQ
                | OP_GT        | OP_BIT_ANDN | OP_BIT_XOR | OP_SUB
                | OP_BIT_XORN  | OP_SHIFTR   | OP_NEQ     | OP_RESERVED1
   deriving Enum
-type Registers = UA.UArray Register Word32
-type Memory    = Map Word32 Word32
-type CPU       = State (Registers, Memory)
-
-getReg :: Register -> CPU Word32
-getReg A   = return 0
-getReg reg = do
-  (regs, _mem) <- get
-  return $ regs UA.! reg
-
-setReg :: Register -> Word32 -> CPU ()
-setReg A   _val  = return ()
-setReg reg val   = do
-  (regs, mem) <- get
-  let regs' = regs UA.// [(reg, val)]
-  put (regs', mem)
-
-getMem :: Word32 -> CPU Word32
-getMem addr = do
-  (_regs, mem) <- get
-  return $ findWithDefault 0 addr mem
-
-setMem :: Word32 -> Word32 -> CPU ()
-setMem addr val = do
-  (regs, mem) <- get
-  let mem' = insert addr val mem
-  put (regs, mem')
 
 extract :: Word32 -> Int -> Int -> Word32
 extract word start len = (shiftR word start) .&. (shiftL 1 len - 1)
@@ -106,11 +78,6 @@ getOp OP_SUB      = \x y -> x - y
 getOp OP_BIT_XORN = \x y -> x `xor` (complement y)
 getOp OP_SHIFTR   = \x y -> x `div` (2 ^ y)
 getOp OP_NEQ      = \x y -> boolToReg (x /= y)
-
-initCPU :: (Registers, Memory)
-initCPU = (regs, mem)
-  where regs = UA.array (A, P) []
-        mem  = Data.Map.empty
 
 parse  :: Get [Word32]
 parse = do skip (4 * 4)
