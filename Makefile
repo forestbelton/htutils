@@ -1,6 +1,6 @@
 .PHONY: clean
 
-htsim: htsim.hs Arch.hs
+htsim: htsim.hs Arch.hs Operation.hs
 	ghc htsim.hs Arch.hs
 
 clean:
