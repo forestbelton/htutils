@@ -10,16 +10,14 @@ import Operation
 runCode :: CPU ()
 runCode = do
   pc   <- getReg P
-  word <- getMem pc
-  setReg P (pc + 1)
---  trace ("word: " ++ (showHex word "")) $ return ()
+  word <- getMem pc -- Fetch word at program counter
+  setReg P (pc + 1) -- Then update
+
   case word of
-    0xffffffff ->
+    0xffffffff ->   -- Halt on illegal instruction
       return ()
     _ ->
       do eval word
-         (regs, _mem) <- get
---         trace ("regs: " ++ (show regs)) $ return ()
          runCode
 
 parse  :: Get [Word32]
@@ -44,4 +42,3 @@ main = do argv    <- getArgs
           let insns       = runGet parse bstring
           let (regs, mem) = evalState (boot insns) initCPU
           putStrLn $ show regs
-          return ()
