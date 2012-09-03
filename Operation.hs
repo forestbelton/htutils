@@ -41,25 +41,25 @@ eval word = do
 
 boolToReg :: Bool -> Word32
 boolToReg False = 0x00000000
-boolToReg True = 0xffffffff
+boolToReg True  = 0xffffffff
 
--- TODO: Explain this
-foo :: Word32 -> Word32
-foo = xor 0x80000000
+-- Prepare a value for a signed comparison
+prepCmp :: Word32 -> Word32
+prepCmp = xor 0x80000000
 
 getOp :: Operation -> (Word32 -> Word32 -> Word32)
-getOp OP_BIT_OR   = \x y -> x .|. y
-getOp OP_BIT_AND  = \x y -> x .&. y
-getOp OP_ADD      = \x y -> x + y
-getOp OP_MUL      = \x y -> x * y
-getOp OP_SHIFTL   = \x y -> shiftL x $ fromIntegral y
-getOp OP_LT       = \x y -> boolToReg (foo x < foo y)
-getOp OP_EQ       = \x y -> boolToReg (x == y)
-getOp OP_GT       = \x y -> boolToReg (foo x > foo y)
-getOp OP_BIT_ANDN = \x y -> x .&. (complement y)
-getOp OP_BIT_XOR  = \x y -> x `xor` y
-getOp OP_SUB      = \x y -> x - y
-getOp OP_BIT_XORN = \x y -> x `xor` (complement y)
-getOp OP_SHIFTR   = \x y -> shiftR x $ fromIntegral y
-getOp OP_NEQ      = \x y -> boolToReg (x /= y)
+getOp OP_BIT_OR   = (.|.)
+getOp OP_BIT_AND  = (.&.)
+getOp OP_ADD      = (+)
+getOp OP_MUL      = (*)
+getOp OP_SHIFTL   = (. fromIntegral) . shiftL
+getOp OP_LT       = (boolToReg .) . (. prepCmp) . (<) . prepCmp
+getOp OP_EQ       = (boolToReg .) . (==)
+getOp OP_GT       = (boolToReg .) . (. prepCmp) . (>) . prepCmp
+getOp OP_BIT_ANDN = (. complement) . (.&.)
+getOp OP_BIT_XOR  = xor
+getOp OP_SUB      = (-)
+getOp OP_BIT_XORN = (. complement) . xor
+getOp OP_SHIFTR   = (. fromIntegral) . shiftR
+getOp OP_NEQ      = (boolToReg .) . (/=)
 
