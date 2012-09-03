@@ -52,7 +52,7 @@ getOp OP_BIT_OR   = \x y -> x .|. y
 getOp OP_BIT_AND  = \x y -> x .&. y
 getOp OP_ADD      = \x y -> x + y
 getOp OP_MUL      = \x y -> x * y
-getOp OP_SHIFTL   = \x y -> x * (2 ^ y)
+getOp OP_SHIFTL   = \x y -> shiftL x $ fromIntegral y
 getOp OP_LT       = \x y -> boolToReg (foo x < foo y)
 getOp OP_EQ       = \x y -> boolToReg (x == y)
 getOp OP_GT       = \x y -> boolToReg (foo x > foo y)
@@ -60,6 +60,6 @@ getOp OP_BIT_ANDN = \x y -> x .&. (complement y)
 getOp OP_BIT_XOR  = \x y -> x `xor` y
 getOp OP_SUB      = \x y -> x - y
 getOp OP_BIT_XORN = \x y -> x `xor` (complement y)
-getOp OP_SHIFTR   = \x y -> x `div` (2 ^ y)
+getOp OP_SHIFTR   = \x y -> shiftR x $ fromIntegral y
 getOp OP_NEQ      = \x y -> boolToReg (x /= y)
 
