@@ -6,8 +6,6 @@ import Data.Word
 
 import Arch
 
-import Debug.Trace
-
 data Operation = OP_BIT_OR    | OP_BIT_AND  | OP_ADD     | OP_MUL
                | OP_RESERVED0 | OP_SHIFTL   | OP_LT      | OP_EQ
                | OP_GT        | OP_BIT_ANDN | OP_BIT_XOR | OP_SUB
