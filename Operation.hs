@@ -6,6 +6,8 @@ import Data.Word
 
 import Arch
 
+import Debug.Trace
+
 data Operation = OP_BIT_OR    | OP_BIT_AND  | OP_ADD     | OP_MUL
                | OP_RESERVED0 | OP_SHIFTL   | OP_LT      | OP_EQ
                | OP_GT        | OP_BIT_ANDN | OP_BIT_XOR | OP_SUB
@@ -27,7 +29,7 @@ eval word = do
   z <- getReg zreg
 
   let swap = (== 1) $ extract word 30 2
-  let mode = fromIntegral $ extract word 24 4
+  let mode = fromIntegral $ extract word 28 2
   let f    = getOp $ toEnum $ fromIntegral $ extract word 12 4
   let imm  = sex $ extract word 0 12
 
