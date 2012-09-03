@@ -6,10 +6,10 @@ import Data.Word
 
 import Arch
 
-data Operation = OP_BIT_OR | OP_BIT_AND | OP_ADD | OP_MUL
-               | OP_RESERVED0 | OP_SHIFTL | OP_LT | OP_EQ
-               | OP_GT | OP_BIT_ANDN | OP_BIT_XOR | OP_SUB
-               | OP_BIT_XORN | OP_SHIFTR | OP_NEQ | OP_RESERVED1
+data Operation = OP_BIT_OR    | OP_BIT_AND  | OP_ADD     | OP_MUL
+               | OP_RESERVED0 | OP_SHIFTL   | OP_LT      | OP_EQ
+               | OP_GT        | OP_BIT_ANDN | OP_BIT_XOR | OP_SUB
+               | OP_BIT_XORN  | OP_SHIFTR   | OP_NEQ     | OP_RESERVED1
   deriving Enum
 
 extract :: Word32 -> Int -> Int -> Word32
@@ -48,18 +48,18 @@ foo :: Word32 -> Word32
 foo = xor 0x80000000
 
 getOp :: Operation -> (Word32 -> Word32 -> Word32)
-getOp OP_BIT_OR = \x y -> x .|. y
-getOp OP_BIT_AND = \x y -> x .&. y
-getOp OP_ADD = \x y -> x + y
-getOp OP_MUL = \x y -> x * y
-getOp OP_SHIFTL = \x y -> x * (2 ^ y)
-getOp OP_LT = \x y -> boolToReg (foo x < foo y)
-getOp OP_EQ = \x y -> boolToReg (x == y)
-getOp OP_GT = \x y -> boolToReg (foo x > foo y)
+getOp OP_BIT_OR   = \x y -> x .|. y
+getOp OP_BIT_AND  = \x y -> x .&. y
+getOp OP_ADD      = \x y -> x + y
+getOp OP_MUL      = \x y -> x * y
+getOp OP_SHIFTL   = \x y -> x * (2 ^ y)
+getOp OP_LT       = \x y -> boolToReg (foo x < foo y)
+getOp OP_EQ       = \x y -> boolToReg (x == y)
+getOp OP_GT       = \x y -> boolToReg (foo x > foo y)
 getOp OP_BIT_ANDN = \x y -> x .&. (complement y)
-getOp OP_BIT_XOR = \x y -> x `xor` y
-getOp OP_SUB = \x y -> x - y
+getOp OP_BIT_XOR  = \x y -> x `xor` y
+getOp OP_SUB      = \x y -> x - y
 getOp OP_BIT_XORN = \x y -> x `xor` (complement y)
-getOp OP_SHIFTR = \x y -> x `div` (2 ^ y)
-getOp OP_NEQ = \x y -> boolToReg (x /= y)
+getOp OP_SHIFTR   = \x y -> x `div` (2 ^ y)
+getOp OP_NEQ      = \x y -> boolToReg (x /= y)
 
