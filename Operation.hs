@@ -19,20 +19,25 @@ sex :: Word32 -> Word32
 sex n = n .|. (0xfffff800 * ((shiftR n 11) .&. 1))
 
 eval :: Word32 -> CPU ()
-eval word = case mode of
-  0 -> do res <- result; setReg z res
-  1 -> do res <- result; m <- getMem res; setReg z m
-  2 -> do res <- result; dst <- getReg z; setMem dst res
-  _ -> do res <- result; src <- getReg z; setMem res src
-  where swap = (== 1) $ extract word 30 2
-        mode = fromIntegral $ extract word 28 2
-        z = toEnum $ fromIntegral $ extract word 24 4
-        x = getReg $ toEnum $ fromIntegral $ extract word 20 4
-        y = getReg $ toEnum $ fromIntegral $ extract word 16 4
-        f = liftM2 $ getOp $ toEnum $ fromIntegral $ extract word 12 4
-        imm = return $ sex $ extract word 0 12
-        addM = liftM2 (+)
-        result = if swap then f x imm `addM` y else f x y `addM` imm
+eval word = do
+  let zreg = toEnum $ fromIntegral $ extract word 24 4
+
+  x <- getReg $ toEnum $ fromIntegral $ extract word 20 4
+  y <- getReg $ toEnum $ fromIntegral $ extract word 16 4
+  z <- getReg zreg
+
+  let swap = (== 1) $ extract word 30 2
+  let mode = fromIntegral $ extract word 24 4
+  let f    = getOp $ toEnum $ fromIntegral $ extract word 12 4
+  let imm  = sex $ extract word 0 12
+
+  let result = if swap then f x imm + y else f x y + imm
+
+  case mode of
+    0 -> setReg zreg result
+    1 -> do m <- getMem result; setReg zreg m
+    2 -> setMem z result
+    3 -> setMem result z
 
 boolToReg :: Bool -> Word32
 boolToReg False = 0x00000000
