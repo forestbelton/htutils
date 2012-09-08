@@ -18,7 +18,7 @@ extract word start len = (shiftR word start) .&. (shiftL 1 len - 1)
 sex :: Word32 -> Word32
 sex n = n .|. (0xfffff800 * ((shiftR n 11) .&. 1))
 
-eval :: Word32 -> CPU ()
+eval :: Word32 -> CPU Bool
 eval word = do
   let zreg = toEnum $ fromIntegral $ extract word 24 4
 
@@ -34,10 +34,10 @@ eval word = do
   let result = if swap then f x imm + y else f x y + imm
 
   case mode of
-    0 -> setReg zreg result
-    1 -> do m <- getMem result; setReg zreg m
-    2 -> setMem z result
-    3 -> setMem result z
+    0 -> do setReg zreg result; return $ zreg /= P
+    1 -> do m <- getMem result; setReg zreg m; return $ zreg /= P
+    2 -> do setMem z result; return True
+    3 -> do setMem result z; return True
 
 boolToReg :: Bool -> Word32
 boolToReg False = 0x00000000
