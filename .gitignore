@@ -1,6 +1,9 @@
+bin
 dist
 cabal-dev
 *.o
 *.hi
 *.chi
 *.chs.h
+src/htas/htas
+src/htsim/htsim
