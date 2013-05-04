@@ -7,22 +7,17 @@ import System.Environment
 import Arch
 import Operation
 
-runCode :: Bool -> CPU ()
-runCode update = do
+runCode :: CPU ()
+runCode = do
   pc   <- getReg P
   word <- getMem pc -- Fetch word at program counter
 
-  if update then
-    setReg P (pc + 1) -- Then update
-  else
-    return ()
+  setReg P $ pc + 1
 
-  case word of
-    0xffffffff ->   -- Halt on illegal instruction
-      return ()
-    _ ->
-      do shouldUpdate <- eval word
-         runCode shouldUpdate
+  if word == 0xffffffff then
+    return ()
+  else
+    do eval word; runCode
 
 parse  :: Get [Word32]
 parse = do skip (4 * 4)
@@ -33,7 +28,7 @@ boot :: [Word32] -> CPU (Registers, Memory)
 boot insns = do
   boot' 0x1000 insns    -- Load instructions into memory.
   setReg P 0x1000       -- Initialize program counter.
-  runCode True          -- Begin program.
+  runCode               -- Begin program.
   get                   -- Return final state.
  where boot' addr []     = return ()
        boot' addr (x:xs) = do
