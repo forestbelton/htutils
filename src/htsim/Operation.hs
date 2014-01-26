@@ -18,13 +18,13 @@ extract word start len = (shiftR word start) .&. (shiftL 1 len - 1)
 sex :: Word32 -> Word32
 sex n = n .|. (0xfffff800 * ((shiftR n 11) .&. 1))
 
-eval :: Word32 -> CPU ()
-eval word = do
+eval :: Word32 -> CPU -> IO ()
+eval word cpu = do
   let zreg = toEnum $ fromIntegral $ extract word 24 4
 
-  x <- getReg $ toEnum $ fromIntegral $ extract word 20 4
-  y <- getReg $ toEnum $ fromIntegral $ extract word 16 4
-  z <- getReg zreg
+  x <- getReg (toEnum $ fromIntegral $ extract word 20 4) cpu
+  y <- getReg (toEnum $ fromIntegral $ extract word 16 4) cpu
+  z <- getReg zreg cpu
 
   let swap = (== 1) $ extract word 30 2
   let mode = fromIntegral $ extract word 28 2
@@ -34,10 +34,10 @@ eval word = do
   let result = if swap then f x imm + y else f x y + imm
 
   case mode of
-    0 -> do setReg zreg result
-    1 -> do m <- getMem result; setReg zreg m
-    2 -> do setMem z result
-    3 -> do setMem result z
+    0 -> do setReg zreg result cpu
+    1 -> do m <- getMem result cpu; setReg zreg m cpu
+    2 -> setMem z result cpu
+    3 -> setMem result z cpu
 
   return ()
 

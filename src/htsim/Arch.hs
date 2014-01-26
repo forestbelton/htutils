@@ -1,8 +1,8 @@
 module Arch where
 
-import Control.Monad.State
 import Data.Array.Unboxed
 import Data.Map hiding ((!))
+import Data.IORef
 import Data.Word
 
 data Register = A | B | C | D | E | F | G | H
@@ -11,33 +11,27 @@ data Register = A | B | C | D | E | F | G | H
 
 type Registers = UArray Register Word32
 type Memory    = Map Word32 Word32
-type CPU       = State (Registers, Memory)
+type CPU       = IORef (Registers, Memory)
 
-getReg :: Register -> CPU Word32
-getReg A   = return 0
-getReg reg = do
-  (regs, _mem) <- get
+getReg :: Register -> CPU -> IO Word32
+getReg A   _   = return 0
+getReg reg cpu = do
+  (regs, _) <- readIORef cpu
   return $ regs ! reg
 
-setReg :: Register ->Word32 -> CPU ()
-setReg A   _val = return ()
-setReg reg val  = do
-  (regs, mem) <- get
-  let regs' = regs // [(reg, val)]
-  put (regs', mem)
+setReg :: Register -> Word32 -> CPU -> IO ()
+setReg A   _   _   = return ()
+setReg reg val cpu = modifyIORef' cpu $ \(regs, mem) -> (regs // [(reg, val)], mem)
 
-getMem :: Word32 -> CPU Word32
-getMem addr = do
-  (_regs, mem) <- get
+getMem :: Word32 -> CPU -> IO Word32
+getMem addr cpu = do
+  (_, mem) <- readIORef cpu
   return $ findWithDefault 0 addr mem
 
-setMem :: Word32 -> Word32 -> CPU ()
-setMem addr val = do
-  (regs, mem) <- get
-  let mem' = insert addr val mem
-  put (regs, mem')
+setMem :: Word32 -> Word32 -> CPU -> IO ()
+setMem addr val cpu = modifyIORef' cpu $ \(regs, mem) -> (regs, insert addr val mem)
 
-initCPU :: (Registers, Memory)
-initCPU = (regs, mem)
+initCPU :: IO CPU
+initCPU = newIORef (regs, mem)
   where regs = array (A, P) []
         mem  = empty
